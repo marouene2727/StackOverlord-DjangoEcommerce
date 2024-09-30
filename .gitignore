@@ -1,0 +1,14 @@
+# Environnement virtuel
+# env/
+# venv/
+
+# Fichiers Python
+# *.pyc
+# __pycache__/
+
+# Fichiers de base de données
+*.sqlite3
+
+# Dossiers Django
+# /static/
+# media/
