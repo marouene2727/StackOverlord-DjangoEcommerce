@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,9 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'  # Redirection après la connexion
 LOGOUT_REDIRECT_URL = 'home'  # Redirection après la déconnexion
+
+
+
+
+MEDIA_URL = '/img/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'img')
