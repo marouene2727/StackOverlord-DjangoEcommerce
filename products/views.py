@@ -2,7 +2,10 @@ import nltk
 nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
-nltk.download('corpus')
+
+import logging
+
+
 
 
 from django.shortcuts import render, get_object_or_404
@@ -15,6 +18,11 @@ from .models import Product, Category, Review
 
 from django.db.models import Count, Case, When, IntegerField
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
+
+
 
 
 from textblob import TextBlob
@@ -26,10 +34,16 @@ from textblob import TextBlob
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+
+import requests
 #
+
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def home(request):
+    print("salut")
     return render(request, 'index.html')
 
 @login_required
@@ -60,7 +74,7 @@ def shopDetails(request, product_name):
     )
     
     total_reviews = sum(sentiment_counts.values())
-    satisfaction_rate = (sentiment_counts['positive'] / total_reviews * 100) if total_reviews > 0 else 0
+    satisfaction_rate = ((sentiment_counts['positive'] + (sentiment_counts['neutral']/2)) / total_reviews * 100) if total_reviews > 0 else 0
     
     context = {
         'product': product,
@@ -81,11 +95,15 @@ def shopDetails(request, product_name):
 def add_review(request, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id)
-        comment = request.POST.get('comment')
+        comment = filter_profanity(request.POST.get('comment'))
         rating = request.POST.get('rating')
-        sentiment = analyze_sentiment(comment)
-        Review.objects.create(product=product, comment=comment, rating=rating, sentiment=sentiment)
+        Review.objects.create(product=product, user=request.user, comment=comment, rating=rating)
     return redirect('shopDetails', product_name=product.name)
+
+
+
+
+
 
 
 
@@ -104,7 +122,45 @@ def analyze_sentiment(text):
         return 'negative'
     else:
         return 'neutral'
+    
 
+
+
+
+
+
+@login_required
+@require_POST
+def update_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    data = json.loads(request.body)
+    review.comment = data['comment']
+    review.save()
+    return JsonResponse({
+        'success': True,
+        'comment': review.comment,
+        'updated_at': review.updated_at.strftime('%B %d, %Y')
+    })
+
+
+@login_required
+@require_POST
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+    review.delete()
+    return JsonResponse({'success': True, 'message': 'Review supprimée avec succès'})
+
+
+
+
+import requests
+
+def filter_profanity(text):
+    api_url = f"https://www.purgomalum.com/service/json?text={text}"
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        return response.json()['result']
+    return text
 
 
 

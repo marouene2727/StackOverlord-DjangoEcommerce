@@ -33,6 +33,53 @@
                                 <!-- Modification de l'image du produit -->
                                 <div class="fruite-img">
                                     <img src="{{ product.image.url }}" class="img-fluid w-100 rounded-top" alt="{{ product.name }}">
+
+                                    {% if request.user.is_superuser %}
+                                    <!-- Ajoutez le graphique ici -->
+                                     <hr/>
+                                   
+
+                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                                    <div style="height: 300px;">
+                                        <canvas id="satisfactionChart"></canvas>
+                                    </div>
+
+                                    <script>
+                                    var ctx = document.getElementById('satisfactionChart').getContext('2d');
+                                    var satisfactionChart = new Chart(ctx, {
+                                        type: 'doughnut',
+                                        data: {
+                                            labels: ['Positive', 'Neutral', 'Negative'],
+                                            datasets: [{
+                                                data: [{{ sentiment_counts.positive }}, {{ sentiment_counts.neutral }}, {{ sentiment_counts.negative }}],
+                                                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: {
+                                                    position: 'bottom',
+                                                    labels: {
+                                                        boxWidth: 12,
+                                                        padding: 20
+                                                    }
+                                                },
+                                                title: {
+                                                    display: true,
+                                                    text: 'Satisfaction Rate: {{ satisfaction_rate }}%',
+                                                    font: {
+                                                        size: 14
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                    </script>
+
+                                    {% endif %}
                                 </div>
 
 
@@ -109,8 +156,10 @@
                                                             <p class="mb-0">{{ product.stock }}</p>
                                                         </div>
                                                     </div>
+                                                    
                                                     <!-- Ajoutez d'autres détails du produit ici si nécessaire -->
                                                 </div>
+                                                
 
 
 
@@ -170,54 +219,35 @@
 
                                     <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
                                         {% for review in product.reviews.all %}
-                                        <div class="d-flex">
-                                            <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
-                                            <div class="">
-                                                <p class="mb-2" style="font-size: 14px;">{{ review.created_at|date:"F d, Y" }}</p>
-                                                <div class="d-flex justify-content-between">
-                                                    <h5>{{ review.user.username }}</h5>
-                                                    <div class="d-flex mb-3">
-                                                        {% for i in review.rating|ljust:5 %}
-                                                            <i class="fa fa-star {% if forloop.counter <= review.rating %}text-secondary{% endif %}"></i>
-                                                        {% endfor %}
-                                                    </div>
+                                    <div class="d-flex review" id="review-{{ review.id }}">
+                                        <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
+                                        <div class="">
+                                            <p class="mb-2" style="font-size: 14px;">{{ review.created_at|date:"F d, Y" }}</p>
+                                            <div class="d-flex justify-content-between">
+                                                <h5>{{ review.user.username }}</h5>
+                                                <div class="d-flex mb-3">
+                                                    {% for i in review.rating|ljust:5 %}
+                                                        <i class="fa fa-star {% if forloop.counter <= review.rating %}text-secondary{% endif %}"></i>
+                                                    {% endfor %}
                                                 </div>
-                                                <p>{{ review.comment }}</p>
                                             </div>
+                                            <p class="comment">{{ review.comment }}</p>
+                                            {% if request.user == review.user or request.user.is_superuser %}
+                                                <button class="edit-review btn btn-sm btn-primary" data-review-id="{{ review.id }}">Modifier</button>
+                                            {% endif %}
+                                            {% if request.user == review.user or request.user.is_superuser %}
+                                                <button class="delete-review btn btn-sm btn-danger" data-review-id="{{ review.id }}">Supprimer</button>
+                                            {% endif %}
                                         </div>
-                                        {% empty %}
-                                        <p>Aucun avis pour ce produit pour le moment.</p>
-                                        {% endfor %}
+                                    </div>
+                                    {% empty %}
+                                    <p>Aucun avis pour ce produit pour le moment.</p>
+                                    {% endfor %}
+
                                     </div>
 
 
-                                    <!-- Ajoutez le graphique ici -->
-                                    <canvas id="satisfactionChart" width="400" height="200"></canvas>
-
-                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<canvas id="satisfactionChart" width="400" height="200"></canvas>
-
-<script>
-var ctx = document.getElementById('satisfactionChart').getContext('2d');
-var satisfactionChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Positive', 'Neutral', 'Negative'],
-        datasets: [{
-            data: [{{ sentiment_counts.positive }}, {{ sentiment_counts.neutral }}, {{ sentiment_counts.negative }}],
-            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-        }]
-    },
-    options: {
-        responsive: true,
-        title: {
-            display: true,
-            text: 'Satisfaction Rate: {{ satisfaction_rate }}%'
-        }
-    }
-});
-</script>
+                                    
 
 
 
@@ -232,6 +262,8 @@ var satisfactionChart = new Chart(ctx, {
                                     </div>
                                 </div>
                             </div>
+
+
                             <form action="{% url 'add_review' product.id %}" method="post">
                                 {% csrf_token %}
                                 <h4 class="mb-5 fw-bold">Leave a Review</h4>
@@ -447,6 +479,91 @@ var satisfactionChart = new Chart(ctx, {
 
 
             </div>
+
+            <script>
+                document.querySelectorAll('.edit-review').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reviewId = this.getAttribute('data-review-id');
+                        const reviewElement = document.getElementById(`review-${reviewId}`);
+                        const commentElement = reviewElement.querySelector('.comment');
+                        const currentComment = commentElement.textContent;
+                
+                        const textarea = document.createElement('textarea');
+                        textarea.value = currentComment;
+                        commentElement.replaceWith(textarea);
+                
+                        const saveButton = document.createElement('button');
+                        saveButton.textContent = 'Enregistrer';
+                        saveButton.addEventListener('click', function() {
+                            const newComment = textarea.value;
+                            fetch(`/products/update-review/${reviewId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    
+                                },
+                                body: JSON.stringify({ comment: newComment })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    commentElement.textContent = data.comment;
+                                    reviewElement.querySelector('.updated-at').textContent = data.updated_at;
+                                    textarea.replaceWith(commentElement);
+                                    saveButton.remove();
+                                }
+                            });
+                        });
+                
+                        reviewElement.appendChild(saveButton);
+                    });
+                });
+                
+                
+                </script>
+
+                <script>
+                    $(document).ready(function() {
+                        $('.delete-review').click(function() {
+                            var reviewId = $(this).data('review-id');
+                            if (confirm('Êtes-vous sûr de vouloir supprimer cette review ?')) {
+                                $.ajax({
+                                    url: '/products/delete-review/' + reviewId + '/',
+                                    type: 'POST',
+                                    headers: {
+                                        'X-CSRFToken': getCookie('csrftoken')
+                                    },
+                                    success: function(data) {
+                                        if (data.success) {
+                                            $('#review-' + reviewId).remove();
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error('Erreur lors de la suppression:', error);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    
+                    
+                    function getCookie(name) {
+                        let cookieValue = null;
+                            if (document.cookie && document.cookie !== '') {
+                                const cookies = document.cookie.split(';');
+                                for (let i = 0; i < cookies.length; i++) {
+                                    const cookie = cookies[i].trim();
+                                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                        break;
+                                    }
+                                }
+                            }
+                        return cookieValue;
+                    }
+                    </script>
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                
         </div>
         <!-- Single Product End -->
     
