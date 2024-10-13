@@ -1,0 +1,179 @@
+{% extends 'index.html' %}
+{% block content %}
+
+<h1>Articles</h1>
+
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Articles</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <div class="text-center mx-auto mb-5" style="max-width: 700px;">
+                <h1 class="display-4">Articles</h1>
+                <p>Voici la liste des articles disponibles.</p>
+                <a href="{% url 'article_create' %}" class="btn btn-primary">Créer un nouvel article</a>
+            </div>
+            <div class="row g-4">
+                {% for article in articles %}
+<div class="col-lg-6 col-xl-4">
+    <div class="p-4 rounded bg-light">
+        <div class="row align-items-center">
+            <div class="col-6">
+                {% if article.image %}
+                <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
+            {% endif %}            </div>
+            <div class="col-6">
+                <a href="{% url 'article_detail' article.pk %}" class="h5">{{ article.title }}</a>
+                <div class="d-flex my-3">
+                    {% for star in "*****" %}
+                        {% if forloop.counter <= article.rating %}
+                            <i class="fas fa-star text-primary"></i>
+                        {% else %}
+                            <i class="fas fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <h4 class="mb-3">contenu :  </h4>
+                <p>{{ article.content }}</p>
+                <h5 class="card-title"> title : </h5>
+                <P>{{ article.title }}</P>
+               
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+
+                <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary">Voir</a>
+                {% if article.author == request.user %}
+                    <a href="{% url 'article_update' article.pk %}" class="btn btn-outline-warning border border-secondary ms-2">Éditer</a>
+                    <a href="{% url 'article_delete' article.pk %}" class="btn btn-outline-primary border border-primary ms-2">Supprimer</a>
+                {% endif %}
+
+                </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Fact Start -->
+    
+</body>
+</html>
+
+<!-- Fruits Shop Start-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Articles</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .fruite-item {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .fruite-img {
+            height: 200px; /* Hauteur fixe pour uniformiser les images */
+            overflow: hidden; /* Masquer le débordement */
+        }
+
+        .fruite-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Couvrir le cadre sans déformation */
+        }
+
+        .article-content {
+            flex: 0; /* Ne pas prendre d'espace supplémentaire */
+            margin-top: auto; /* Pousser le contenu vers le bas */
+        }
+
+        .article-title {
+            min-height: 50px; /* Hauteur minimale pour les titres */
+        }
+
+        .article-description {
+            min-height: 80px; /* Hauteur minimale pour la description */
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <div class="tab-class text-center">
+                <div class="row g-4">
+                    <div class="col-lg-4 text-start">
+                        <h1>Tous les Articles</h1>
+                    </div>
+                    <div class="col-lg-8 text-end">
+                        <ul class="nav nav-pills d-inline-flex text-center mb-5">
+                            <li class="nav-item">
+                                <a class="d-flex m-2 py-2 bg-light rounded-pill active" data-bs-toggle="pill" href="#tab-all">
+                                    <span class="text-dark">Tous les Articles</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-user">
+                                    <span class="text-dark">Articles de Mon Compte</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="d-flex m-2 py-2 bg-light rounded-pill" data-bs-toggle="pill" href="#tab-others">
+                                    <span class="text-dark">Articles des Autres Utilisateurs</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div id="tab-all" class="tab-pane fade show p-0 active">
+                        <div class="row g-4">
+                            {% for article in articles %}
+                            <div class="col-md-6 col-lg-4 col-xl-3">
+                                <div class="rounded position-relative fruite-item">
+                                    <div class="fruite-img">
+                                        {% if article.image %}
+                                        <img src="{{ article.image.url }}" class="img-fluid rounded-top" alt="{{ article.title }}">
+                                        {% endif %}
+                                    </div>
+                                    <div class="p-4 border border-secondary border-top-0 rounded-bottom article-content">
+                                        <h4 class="article-title">{{ article.title }}</h4>
+                                        <p class="article-description">{{ article.content }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary">Voir</a>
+                                            {% if article.author == request.user %}
+                                                <a href="{% url 'article_update' article.pk %}" class="btn btn-outline-warning border border-secondary ms-2"><i class="fas fa-edit"></i></a>
+                                                <a href="{% url 'article_delete' article.pk %}" class="btn btn-outline-primary border border-primary ms-2"><i class="fas fa-trash-alt"></i></a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Les autres onglets (tab-user et tab-others) suivent la même structure -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+{% endblock %}
