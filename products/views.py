@@ -5,6 +5,8 @@ nltk.download('stopwords')
 
 import logging
 
+from django.db.models import Count
+
 
 
 
@@ -21,7 +23,7 @@ from django.db.models import Count, Case, When, IntegerField
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
-
+from django.db.models import Q
 
 
 
@@ -64,23 +66,22 @@ def shop(request):
 
 @login_required
 def shopDetails(request, product_name):
-    product = get_object_or_404(Product, name=product_name)
-    reviews = product.reviews.all()
-    
-    sentiment_counts = reviews.aggregate(
-        positive=Count(Case(When(sentiment='positive', then=1))),
-        negative=Count(Case(When(sentiment='negative', then=1))),
-        neutral=Count(Case(When(sentiment='neutral', then=1)))
-    )
-    
+    product = get_object_or_404(Product.objects.annotate(
+        user_review_count=Count('reviews', filter=Q(reviews__user=request.user))
+    ), name=product_name)
+
+    reviews = Review.objects.filter(product=product).order_by('-created_at')
+
+    sentiment_counts = {
+        'positive': reviews.filter(sentiment='positive').count(),
+        'neutral': reviews.filter(sentiment='neutral').count(),
+        'negative': reviews.filter(sentiment='negative').count(),
+    }
     total_reviews = sum(sentiment_counts.values())
-    satisfaction_rate = ((sentiment_counts['positive'] + (sentiment_counts['neutral']/2)) / total_reviews * 100) if total_reviews > 0 else 0
-    
+    satisfaction_rate = (sentiment_counts['positive'] / total_reviews * 100) if total_reviews > 0 else 0
+
     context = {
         'product': product,
-        'categories': Category.objects.all(),
-        'products': Product.objects.all(),
-        'related_products': Product.objects.filter(category=product.category).exclude(id=product.id),
         'reviews': reviews,
         'sentiment_counts': sentiment_counts,
         'satisfaction_rate': round(satisfaction_rate, 2)
@@ -91,14 +92,20 @@ def shopDetails(request, product_name):
 
 
 
+
 @login_required
 def add_review(request, product_id):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, id=product_id)
+    product = get_object_or_404(Product, id=product_id)
+    user_review_count = Review.objects.filter(product=product, user=request.user).count()
+
+    if request.method == 'POST' and (user_review_count < 3 or request.user.is_superuser):
         comment = filter_profanity(request.POST.get('comment'))
         rating = request.POST.get('rating')
         Review.objects.create(product=product, user=request.user, comment=comment, rating=rating)
+        return redirect('shopDetails', product_name=product.name)
+
     return redirect('shopDetails', product_name=product.name)
+
 
 
 
