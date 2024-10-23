@@ -86,19 +86,28 @@
                             </a>
                         
                             <!-- Authentification de l'utilisateur -->
-                            {% if user.is_authenticated %}
-                            <!-- Affiche le nom de l'utilisateur et le bouton de déconnexion -->
-                            <div class="my-auto me-3 d-flex align-items-center">
-                                <i class="fas fa-user-circle fa-2x text-primary me-2"></i>
-                                <span class="text-primary fw-bold">{{ user.username }}</span>
+                            <div class="d-flex m-3 me-0 align-items-center">
+                                <!-- Afficher le nom de l'utilisateur avec un menu déroulant -->
+                                {% if user.is_authenticated %}
+                                    <div class="dropdown">
+                                        <a href="#" class="dropdown-toggle text-primary" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ user.username }}
+                                        </a>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownUser">
+                                            <li><a class="dropdown-item" href="{% url 'user_profile' %}">Mon Profil</a></li>
+                                            {% if user.is_superuser %}
+                                                <li><a class="dropdown-item" href="/admin/">Dashboard Admin</a></li>
+                                            {% endif %}
+                                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Déconnexion</a></li>
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'login' %}" class="btn btn-outline-primary">Connexion</a>
+                                {% endif %}
                             </div>
-                            <a href="{% url 'logout' %}" class="btn btn-outline-warning border border-secondary ms-2">Déconnexion</a>
-
-                            {% else %}
-                                <!-- Affiche le bouton de connexion si l'utilisateur n'est pas connecté -->
-                                <a href="{% url 'login' %}" class="btn btn-outline-primary">Connexion</a>
-                            {% endif %}
+                            
                         </div>
+                        
                         
                     </div>
                 </nav>
