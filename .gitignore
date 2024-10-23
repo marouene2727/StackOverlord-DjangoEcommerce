@@ -1,0 +1,30 @@
+# Virtual environments
+env/
+venv/
+
+# Python bytecode files
+*.pyc
+__pycache__/
+
+# SQLite database files
+*.sqlite3
+
+# Django specific folders
+/static/
+/media/
+
+# Exclude all migrations
+**/migrations/
+
+# Ignore secret key files (if applicable)
+.env
+
+# Ignore JetBrains and VSCode project settings
+.idea/
+.vscode/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore large torch files
+venv/Lib/site-packages/torch/lib/
