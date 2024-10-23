@@ -10,7 +10,6 @@ __pycache__/
 *.sqlite3
 
 # Django specific folders
-/static/
 /media/
 
 # Exclude all migrations
