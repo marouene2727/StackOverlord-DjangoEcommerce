@@ -1,10 +1,10 @@
 # Environnement virtuel
-# env/
-# venv/
+ env/
+ venv/
 
 # Fichiers Python
-# *.pyc
-# __pycache__/
+ *.pyc
+ __pycache__/
 
 # Fichiers de base de données
 *.sqlite3

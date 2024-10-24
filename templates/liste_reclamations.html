@@ -1,0 +1,165 @@
+{% extends 'index.html' %}
+
+{% block title %}Mes Réclamations{% endblock %}
+
+{% block content %}
+
+<style>
+    .badge-traite {
+    background-color: green; /* Vert pour 'Traité' */
+    color: white;
+}
+
+.badge-rejete {
+    background-color: red; /* Rouge pour 'Rejeté' */
+    color: white;
+}
+
+.badge-en-attente {
+    background-color: orange; /* Couleur de votre choix pour 'En attente' */
+    color: white;
+}
+
+</style>
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Mes Réclamations</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Réclamations</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+
+<!-- Reclamations List Start -->
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h2 class="text-center my-4">Mes Réclamations</h2>
+
+            <!-- Button to open the modal for adding a new reclamation -->
+            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addReclamationModal">
+                Ajouter Réclamation
+            </button>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th class="text-center">Statut</th>
+                            <th>Date de création</th>
+                            <th class="text-center">Réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reclamation in reclamations %}
+                        <tr>
+                            <td>{{ reclamation.type_reclamation }}</td>
+                            <td>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#descriptionModal{{ forloop.counter }}">Détails</a>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-pill 
+                                    {% if reclamation.statut == 'Traité' %}badge-traite
+                                    {% elif reclamation.statut == 'Rejeté' %}badge-rejete
+                                    {% else %}badge-en-attente
+                                    {% endif %}">
+                                    {{ reclamation.statut }}
+                                </span>
+                            </td>
+                            <td>{{ reclamation.date_creation|date:"d M Y H:i" }}</td>
+                            <td class="text-center">
+                                {% if reclamation.reponse_admin %}
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#responseModal{{ forloop.counter }}">Détails</a>
+                                {% else %}
+                                    <span class="text-muted">En attente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+            
+                        <!-- Description Modal -->
+                        <div class="modal fade" id="descriptionModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="descriptionModalLabel{{ forloop.counter }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="descriptionModalLabel{{ forloop.counter }}">Description de la Réclamation</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{ reclamation.description }}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <!-- Response Modal -->
+                        {% if reclamation.reponse_admin %}
+                        <div class="modal fade" id="responseModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="responseModalLabel{{ forloop.counter }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="responseModalLabel{{ forloop.counter }}">Réponse de l'Admin</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{ reclamation.reponse_admin }}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucune réclamation trouvée.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Reclamations List End -->
+
+<!-- Add Reclamation Modal -->
+<div class="modal fade" id="addReclamationModal" tabindex="-1" aria-labelledby="addReclamationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReclamationModalLabel">Ajouter Réclamation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'soumettre_reclamation' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-select" id="type" name="type_reclamation">
+                            <option value="Produit">Produit</option>
+                            <option value="Service">Service</option>
+                            <option value="Expérience utilisateur">Expérience utilisateur</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Soumettre</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
