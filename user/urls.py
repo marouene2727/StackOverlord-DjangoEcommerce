@@ -26,6 +26,10 @@ urlpatterns = [
     path('profile/', views.user_profile, name='user_profile'),  # Pour afficher le profil
     path('profile/update/', views.update_user_profile, name='update_user_profile'),
     path('send-email/', views.send_test_email, name='send_test_email'),
+
+    
+
+
     
 ]
 

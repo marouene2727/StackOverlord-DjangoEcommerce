@@ -12,6 +12,8 @@ from django.views.generic.edit import UpdateView
 from .models import UserProfile 
 from django.urls import reverse_lazy
 from django.contrib.auth.views import PasswordResetView
+from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
 
 class CustomPasswordResetView(PasswordResetView):
     def post(self, request, *args, **kwargs):
@@ -61,8 +63,13 @@ def send_test_email(request):
 @login_required
 def user_profile(request):
     """ Affiche les informations du profil utilisateur """
-    profile = request.user.userprofile
-
+    try:
+        profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        # Créer un profil si l'utilisateur n'en a pas
+        profile = UserProfile.objects.create(user=request.user)
+    
+    # save_profile_picture(profile)
     return render(request, 'user_profile.html', {'profile': profile})
 
 @login_required
@@ -72,14 +79,18 @@ def update_user_profile(request):
     profile = user.userprofile
 
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=user)  # Formulaire pour l'email
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)  # Formulaire pour le profil
+        user_form = UserUpdateForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
 
         if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()  # Sauvegarde des informations de l'utilisateur
-            profile_form.save()  # Sauvegarde des informations du profil
+            # Generate bio suggestion if bio is not provided
+            if not profile_form.cleaned_data['bio']:
+                profile.bio = generate_bio_suggestion(user.username, profile.birth_date)
+            
+            user_form.save()
+            profile_form.save()
             messages.success(request, 'Votre profil a été mis à jour avec succès !')
-            return redirect('user_profile')  # Redirige vers la vue d'affichage du profil
+            return redirect('user_profile')
         else:
             messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
     else:
@@ -91,8 +102,49 @@ def update_user_profile(request):
         'profile_form': profile_form,
     })
 
+def generate_bio_suggestion(username, birth_date):
+    # Calculate age
+    if birth_date:
+        today = datetime.today()
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    else:
+        age = None
+    
+    # Generate bio based on username and age
+    if age:
+        return f"{username} is {age} years old and loves exploring new products!"
+    else:
+        return f"{username} is an enthusiastic user with diverse interests."
+def generate_avatar(username):
+    # Crée une image de base
+    img = Image.new('RGB', (100, 100), color=(73, 109, 137))
 
-        
+    # Ajoute un dessin sur l'image
+    d = ImageDraw.Draw(img)
+    
+    # Par exemple, ajouter la première lettre du nom d'utilisateur
+    font = ImageFont.load_default()
+    d.text((10, 10), username[0].upper(), fill=(255, 255, 0), font=font)
+
+    # Enregistre l'image générée dans le répertoire des avatars
+    img_path = f"media/avatars/{username}.png"
+    img.save(img_path)
+
+    return img_path
+
+# def save_profile_picture(request):
+#     user_profile = request.user.userprofile
+    
+#     # Si l'utilisateur n'a pas d'avatar, on le génère automatiquement
+#     if not user_profile.profile_image:
+#         user_profile.profile_image = user_profile.generate_avatar()
+    
+#     # Sauvegarder le profil après mise à jour
+#     user_profile.save()
+
+
+
+      
 @login_required
 def home(request):
     return render(request, 'index.html')

@@ -44,7 +44,7 @@
         <!-- Champ Biographie -->
         <div class="form-group mb-3">
             <label for="bio" class="form-label">Biography</label>
-            <textarea name="bio" id="bio" class="form-control" required>{{ profile_form.bio.value }}</textarea>
+            <textarea name="bio" id="bio" class="form-control">{{ profile_form.bio.value }}</textarea>
             {% if profile_form.bio.errors %}
                 <div class="alert alert-danger">{{ profile_form.bio.errors }}</div>
             {% endif %}
