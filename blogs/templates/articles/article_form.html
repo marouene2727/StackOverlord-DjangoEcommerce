@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+
+{% block title %}Modifier ou Créer un Article{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{% if form.instance.pk %}Modifier un article{% else %}Créer un nouvel article{% endif %}</h1>
+    <form action="{% if form.instance.pk %}{% url 'article_update' form.instance.pk %}{% else %}{% url 'article_create' %}{% endif %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            <div class="col-md-12">
+                <div class="form-item">
+                    <label class="form-label">Blog<sup>*</sup></label>
+                    <select name="blog" class="form-control" required>
+                        {% for blog in blogs %}
+                            <option value="{{ blog.id }}" {% if form.blog.value == blog.id %}selected{% endif %}>{{ blog.title }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ form.blog.errors }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-item">
+                    <label class="form-label">Titre<sup>*</sup></label>
+                    <input type="text" name="title" class="form-control" value="{{ form.title.value|default:'' }}" required>
+                    {{ form.title.errors }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-item">
+                    <label class="form-label">Contenu<sup>*</sup></label>
+                    <textarea name="content" class="form-control" rows="5" required>{{ form.content.value|default:'' }}</textarea>
+                    {{ form.content.errors }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-item">
+                    <label class="form-label">Image</label>
+                    <input type="file" name="image" class="form-control-file">
+                    {{ form.image.errors }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-item">
+                    <label class="form-label">Date de Publication</label>
+                    <input type="date" name="published_at" class="form-control" value="{{ form.published_at.value|default:'' }}">
+                    {{ form.published_at.errors }}
+                </div>
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Soumettre</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
