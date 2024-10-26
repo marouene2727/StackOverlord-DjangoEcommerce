@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Case, When, IntegerField
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Product, Category, Review, Cart, CartItem
+from .models import Order, OrderItem, Product, Category, Review, Cart, CartItem
 from django.contrib.auth.models import User
 from django.urls import reverse
 from decimal import Decimal
@@ -213,20 +213,77 @@ def remove_from_cart(request, item_id):
     # Return a JSON response indicating success
     return JsonResponse({'success': True})
 
+
 @login_required
 def checkout(request):
-    cart = get_object_or_404(Cart, user=request.user)
+    # Get the user's cart
+    cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = cart.items.all()
 
-    if request.method == 'POST':
-        # Implement checkout logic here
-        pass
+    # Calculate subtotal using Decimal to avoid float issues
+    cart_subtotal = sum(Decimal(item.product.price) * item.quantity for item in cart_items)
+    cart_total = cart_subtotal + Decimal('3.00')  # Adding flat rate shipping
 
+    # Pass cart items and totals to the context
     context = {
         'cart_items': cart_items,
-        'total_price': cart.get_total_price()
+        'cart_subtotal': cart_subtotal,
+        'cart_total': cart_total,
     }
-    return render(request, 'checkout.html', context)
+
+    if request.method == 'POST':
+        # Get billing details from the form (as you have already done)
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        country = request.POST.get('country')
+        zip_code = request.POST.get('zip_code')
+        mobile = request.POST.get('mobile')
+        email = request.POST.get('email')
+        payment_method = request.POST.get('payment_method')
+
+        # Calculate total price for the entire order
+        total_order_price = 0
+        cart_items_order = []
+        for item in cart_items:
+            total_price = Decimal(item.product.price) * item.quantity
+            total_order_price += total_price
+            cart_items_order.append((item.product.id, item.quantity, total_price))
+
+        # Create the order
+        order = Order.objects.create(
+            user=request.user,
+            first_name=first_name,
+            last_name=last_name,
+            address=address,
+            city=city,
+            country=country,
+            zip_code=zip_code,
+            mobile=mobile,
+            email=email,
+            payment_method=payment_method,
+            total_price=total_order_price
+        )
+
+        # Create the order items
+        for item in cart_items_order:
+            product = get_object_or_404(Product, id=item[0])  # Fetch product or return 404
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=item[1],
+                total_price=item[2]
+            )
+
+        # Clear the cart by deleting all items from the cart
+        cart.items.all().delete()
+
+        return redirect('/products/shop/')
+
+    return render(request, 'chackout.html', context)
+
+
 
 
 @login_required
