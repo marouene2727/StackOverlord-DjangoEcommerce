@@ -5,6 +5,7 @@ from django.utils import timezone
 from transformers import pipeline
 from .admin_views import statistiques_admin 
 from django.urls import path, reverse
+from background_task import background
 
 # Chargement du modèle de génération de texte
 try:
@@ -22,6 +23,27 @@ def generate_response(description):
             print(f"Erreur lors de la génération de la réponse : {e}")
             return "Erreur de génération."
     return "Le générateur de texte n'est pas disponible."
+
+@background(schedule=300)  # Exécute toutes les 10 minutes
+def check_pending_reclamations():
+    # Rechercher toutes les réclamations en attente
+    pending_reclamations = Reclamation.objects.filter(statut='En attente')
+
+    for reclamation in pending_reclamations:
+        # Vérifier si 10 minutes se sont écoulées depuis la création de la réclamation
+        if (timezone.now() - reclamation.date_creation).total_seconds() > 300:  # 600 secondes = 10 minutes
+            if reclamation.statut == 'En attente':  # Vérifier si la réclamation est encore en attente
+                # Générer une réponse pour chaque réclamation
+                reclamation.reponse_admin = generate_response(reclamation.description)
+
+                # Mettre à jour le statut et la date de traitement seulement après génération de la réponse
+                reclamation.statut = 'Traité'  # Mettre à jour le statut
+                reclamation.date_traitement = timezone.now()  # Mettre à jour la date de traitement
+                reclamation.save()  # Enregistrer les modifications
+                print(f"Réclamation traitée pour l'utilisateur: {reclamation.user.username}")
+        else:
+            print(f"La réclamation de l'utilisateur {reclamation.user.username} est toujours en attente.")
+        print(f"La réclamation de l'utilisateur {reclamation.user.username} est toujours en attente.")
 
 class StatutReclamationFilter(admin.SimpleListFilter):
     title = 'Statut de réclamation'
@@ -45,7 +67,7 @@ class StatutReclamationFilter(admin.SimpleListFilter):
 
 class ReclamationAdmin(admin.ModelAdmin):
     list_display = ('user', 'type_reclamation', 'statut', 'date_creation', 'date_traitement', 'reponse_admin')
-    list_filter = ('statut', 'type_reclamation')
+    list_filter = (StatutReclamationFilter,)  # Utiliser le filtre personnalisé
     search_fields = ('description', 'user__username')
 
     def statistiques_link(self, obj):
@@ -55,20 +77,9 @@ class ReclamationAdmin(admin.ModelAdmin):
         )
     statistiques_link.short_description = 'Actions'
     
-    
-
     def save_model(self, request, obj, form, change):
-        if obj.statut == 'Traité':
-            if obj.date_traitement is None:
-                obj.date_traitement = timezone.now()
-            if obj.description:
-                obj.reponse_admin = generate_response(obj.description)
-            else:
-                obj.reponse_admin = "Aucune réponse générée, description vide."
-        super().save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)  # Enregistrer les modifications sans modifier le traitement automatique
 
-
-    # Ajoutez cette méthode pour les URL personnalisées
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -76,4 +87,8 @@ class ReclamationAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
+# Enregistrer le modèle dans l'admin
 admin.site.register(Reclamation, ReclamationAdmin)
+
+# Démarrer la tâche de vérification des réclamations en attente
+check_pending_reclamations(repeat=300)  # Exécuter la tâche toutes les 10 minutes

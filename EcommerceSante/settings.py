@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'user',
     'products',
     'reclamations',
+    'background_task',
    
 ]
 
