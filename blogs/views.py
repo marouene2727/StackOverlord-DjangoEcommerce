@@ -76,8 +76,16 @@ def testimonial(request):
 
 @login_required
 def article_list(request):
-    articles = Article.objects.all()
-    return render(request, 'articles/article_list.html', {'articles': articles})
+    tab = request.GET.get('tab', 'all')  # Récupère l'onglet sélectionné, par défaut 'all'
+    
+    if tab == 'user':
+        articles = Article.objects.filter(author=request.user)
+    elif tab == 'others':
+        articles = Article.objects.exclude(author=request.user)
+    else:
+        articles = Article.objects.all()
+    
+    return render(request, 'articles/article_list.html', {'articles': articles, 'tab': tab})
 
 @login_required
 def article_detail(request, pk):
