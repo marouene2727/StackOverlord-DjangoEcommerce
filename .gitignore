@@ -1,7 +1,7 @@
 # Virtual environments
 env/
 venv/
-
+myenv/
 # Python bytecode files
 *.pyc
 __pycache__/
@@ -13,7 +13,9 @@ __pycache__/
 /media/
 
 # Exclude all migrations
-**/migrations/
+**/migrations/ 
+
+# skander
 
 # Ignore secret key files (if applicable)
 .env
