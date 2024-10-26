@@ -1,170 +1,246 @@
 
+
 {% extends 'index.html' %}
 
-        {% block title %}Shop Detail{% endblock %}
+{% block title %}Shop Detail{% endblock %}
 
 
 
-        {% block content %}
-        <!-- Single Page Header start -->
-        <div class="container-fluid page-header py-5">
-            <h1 class="text-center text-white display-6">Shop Detail</h1>
-            <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                <li class="breadcrumb-item active text-white">Shop Detail</li>
-            </ol>
-        </div>
-        <!-- Single Page Header End -->
+{% block content %}
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Shop Detail</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Shop Detail</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
 
 
-        <!-- Single Product Start -->
-        <div class="container-fluid py-5 mt-5">
-            <div class="container py-5">
-                <div class="row g-4 mb-5">
-                    <div class="col-lg-8 col-xl-9">
-                        <div class="row g-4">
-                            <div class="col-lg-6">
+<!-- Single Product Start -->
+<div class="container-fluid py-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-4 mb-5">
+            <div class="col-lg-8 col-xl-9">
+                <div class="row g-4">
+                    <div class="col-lg-6">
 
 
 
 
 
-                                <!-- Modification de l'image du produit -->
-                                <div class="fruite-img">
-                                    <img src="{{ product.image.url }}" class="img-fluid w-100 rounded-top" alt="{{ product.name }}">
 
-                                    {% if request.user.is_superuser %}
-                                    <!-- Ajoutez le graphique ici -->
-                                     <hr/>
-                                   
+                        <!-- Modification de l'image du produit -->
+                        <div class="fruite-img">
+                            <img src="{{ product.image.url }}" class="img-fluid w-100 rounded-top"
+                                alt="{{ product.name }}">
 
-                                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            {% if request.user.is_superuser %}
+                            <!-- Ajoutez le graphique ici -->
+                            <hr />
 
-                                    <div style="height: 300px;">
-                                        <canvas id="satisfactionChart"></canvas>
-                                    </div>
 
-                                    <script>
-                                    var ctx = document.getElementById('satisfactionChart').getContext('2d');
-                                    var satisfactionChart = new Chart(ctx, {
-                                        type: 'doughnut',
-                                        data: {
-                                            labels: ['Positive', 'Neutral', 'Negative'],
-                                            datasets: [{
-                                                data: [{{ sentiment_counts.positive }}, {{ sentiment_counts.neutral }}, {{ sentiment_counts.negative }}],
-                                                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                            <div style="height: 300px;">
+                                <canvas id="satisfactionChart"></canvas>
+                            </div>
+
+                            <script>
+                                var ctx = document.getElementById('satisfactionChart').getContext('2d');
+                                var satisfactionChart = new Chart(ctx, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: ['Positive', 'Neutral', 'Negative'],
+                                        datasets: [{
+                                            data: [{{ sentiment_counts.positive }}, {{ sentiment_counts.neutral }}, {{ sentiment_counts.negative }}],
+                                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
                                             }]
                                         },
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
+                                options: {
+                                    responsive: true,
+                                        maintainAspectRatio: false,
                                             plugins: {
-                                                legend: {
-                                                    position: 'bottom',
-                                                    labels: {
-                                                        boxWidth: 12,
-                                                        padding: 20
-                                                    }
-                                                },
-                                                title: {
-                                                    display: true,
-                                                    text: 'Satisfaction Rate: {{ satisfaction_rate }}%',
+                                        legend: {
+                                            position: 'bottom',
+                                                labels: {
+                                                boxWidth: 12,
+                                                    padding: 20
+                                            }
+                                        },
+                                        title: {
+                                            display: true,
+                                                text: 'Satisfaction Rate: {{ satisfaction_rate }}%',
                                                     font: {
-                                                        size: 14
-                                                    }
-                                                }
+                                                size: 14
                                             }
                                         }
+                                    }
+                                }
                                     });
-                                    </script>
+                            </script>
 
-                                    {% endif %}
+                            {% endif %}
+                        </div>
+
+
+
+
+
+                    </div>
+                    <div class="col-lg-6">
+                        <!-- Modification du titre -->
+                        <h4 class="fw-bold mb-3">{{ product.name }}</h4>
+                        <p class="mb-3">Category: {{ product.category.name }}</p>
+                        <h5 class="fw-bold mb-3">{{ product.price }} €</h5>
+
+
+                        <div class="d-flex mb-4">
+                            <i class="fa fa-star text-secondary"></i>
+                            <i class="fa fa-star text-secondary"></i>
+                            <i class="fa fa-star text-secondary"></i>
+                            <i class="fa fa-star text-secondary"></i>
+                            <i class="fa fa-star"></i>
+                        </div>
+
+
+                        <!-- Modification de la description -->
+                        <p class="mb-4">{{ product.description }}</p>
+
+
+                        <!-- ****************************************************cart************************************************************ -->
+                        <form id="add-to-cart-form" method="POST" action="{% url 'add_to_cart' product.id %}">
+                            {% csrf_token %}
+                            <div class="input-group quantity mb-5" style="width: 100px;">
+                                <div class="input-group-btn">
+                                    <button type="button" id="btn-minus"
+                                        class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
                                 </div>
-
-
-
-
-
+                                <input type="text"
+                                    class="form-control form-control-sm text-center border-0 quantity-input" value="1"
+                                    id="quantity" name="quantity">
+                                <div class="input-group-btn">
+                                    <button type="button" id="btn-plus"
+                                        class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-lg-6">
-                                <!-- Modification du titre -->
-                                <h4 class="fw-bold mb-3">{{ product.name }}</h4>
-                                <p class="mb-3">Category: {{ product.category.name }}</p>
-                                <h5 class="fw-bold mb-3">{{ product.price }} €</h5>
-                                <h5 class="fw-bold mb-3">{{ product.price }} €</h5>
-                               
-                                
-                                <div class="d-flex mb-4">
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star"></i>
-                                </div>
+                            <button type="button" id="add-to-cart"
+                                class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary">
+                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                            </button>
+                        </form>
+
+                        <script>
+                            // Increment the quantity
+                            document.getElementById('btn-plus').addEventListener('click', function () {
+                                const quantityInput = document.getElementById('quantity');
+                                let quantity = parseInt(quantityInput.value);
+                                quantityInput.value = quantity + 1;  // Increase the value
+                            });
+
+                            // Decrement the quantity
+                            document.getElementById('btn-minus').addEventListener('click', function () {
+                                const quantityInput = document.getElementById('quantity');
+                                let quantity = parseInt(quantityInput.value);
+                                if (quantity > 1) {
+                                    quantityInput.value = quantity - 1;  // Decrease the value
+                                }
+                            });
+
+                            // Add to cart functionality
+                            document.getElementById('add-to-cart').addEventListener('click', function (event) {
+                                event.preventDefault(); // Prevent default form submission
+
+                                const productId = '{{ product.id }}';  // Ensure this is dynamically set
+                                const quantity = document.getElementById('quantity').value;
+
+                                fetch("{% url 'add_to_cart' 0 %}".replace("0", productId), {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure this is being rendered correctly
+                                    },
+                                    body: JSON.stringify({ quantity: quantity })
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('Item added to cart!');
+                                            // Redirect to the cart page
+                                            window.location.href = '/products/products/cart'; // Redirects to cart.html
+                                        } else {
+                                            alert('Failed to add item to cart.');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('There was a problem with the fetch operation:', error);
+                                    });
+                            });
+                        </script>
+
+
+
+
+                        <!-- ****************************************************cart************************************************************ -->
+
+
+                    </div>
+                    <div class="col-lg-12">
+                        <nav>
+                            <div class="nav nav-tabs mb-3">
+                                <button class="nav-link active border-white border-bottom-0" type="button" role="tab"
+                                    id="nav-about-tab" data-bs-toggle="tab" data-bs-target="#nav-about"
+                                    aria-controls="nav-about" aria-selected="true">Description</button>
+                                <button class="nav-link border-white border-bottom-0" type="button" role="tab"
+                                    id="nav-mission-tab" data-bs-toggle="tab" data-bs-target="#nav-mission"
+                                    aria-controls="nav-mission" aria-selected="false">Reviews</button>
+                            </div>
+                        </nav>
+                        <div class="tab-content mb-5">
+                            <div class="tab-pane active" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
+
 
 
                                 <!-- Modification de la description -->
                                 <p class="mb-4">{{ product.description }}</p>
-                                
-                                
-                                
-                                <div class="input-group quantity mb-5" style="width: 100px;">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input type="text" class="form-control form-control-sm text-center border-0" value="1">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                            <div class="col-lg-12">
-                                <nav>
-                                    <div class="nav nav-tabs mb-3">
-                                        <button class="nav-link active border-white border-bottom-0" type="button" role="tab"
-                                            id="nav-about-tab" data-bs-toggle="tab" data-bs-target="#nav-about"
-                                            aria-controls="nav-about" aria-selected="true">Description</button>
-                                        <button class="nav-link border-white border-bottom-0" type="button" role="tab"
-                                            id="nav-mission-tab" data-bs-toggle="tab" data-bs-target="#nav-mission"
-                                            aria-controls="nav-mission" aria-selected="false">Reviews</button>
-                                    </div>
-                                </nav>
-                                <div class="tab-content mb-5">
-                                    <div class="tab-pane active" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
 
 
-                                        <!-- Modification de la description -->
-                                        <p class="mb-4">{{ product.description }}</p>
 
 
-                                        
-                                        <div class="px-2">
-                                            <div class="row g-4">
+                                <div class="px-2">
+                                    <div class="row g-4">
 
-                                                <!-- Modification des détails du produit -->
+                                        <!-- Modification des détails du produit -->
+                                        <div class="col-6">
+                                            <div
+                                                class="row bg-light align-items-center text-center justify-content-center py-2">
                                                 <div class="col-6">
-                                                    <div class="row bg-light align-items-center text-center justify-content-center py-2">
-                                                        <div class="col-6">
-                                                            <p class="mb-0">Stock</p>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <p class="mb-0">{{ product.stock }}</p>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <!-- Ajoutez d'autres détails du produit ici si nécessaire -->
+                                                    <p class="mb-0">Stock</p>
                                                 </div>
-                                                
+                                                <div class="col-6">
+                                                    <p class="mb-0">{{ product.stock }}</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Ajoutez d'autres détails du produit ici si nécessaire -->
+                                        </div>
 
 
 
-                                               <!--<div class="col-6">
+
+                                        <!--<div class="col-6">
+
                                                     <div class="row bg-light align-items-center text-center justify-content-center py-2">
                                                         <div class="col-6">
                                                             <p class="mb-0">Weight</p>
@@ -205,372 +281,388 @@
                                                             <p class="mb-0">250 Kg</p>
                                                         </div>
                                                     </div>
-                                                </div>--> 
 
-
-
-
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-
-                                    <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
-                                        {% for review in product.reviews.all %}
-                                    <div class="d-flex review" id="review-{{ review.id }}">
-                                        <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
-                                        <div class="">
-                                            <p class="mb-2" style="font-size: 14px;">{{ review.created_at|date:"F d, Y" }}</p>
-                                            <div class="d-flex justify-content-between">
-                                                <h5>{{ review.user.username }}</h5>
-                                                <div class="d-flex mb-3">
-                                                    {% for i in review.rating|ljust:5 %}
-                                                        <i class="fa fa-star {% if forloop.counter <= review.rating %}text-secondary{% endif %}"></i>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                            <p class="comment">{{ review.comment }}</p>
-                                            {% if request.user == review.user or request.user.is_superuser %}
-                                                <button class="edit-review btn btn-sm btn-primary" data-review-id="{{ review.id }}">Modifier</button>
-                                            {% endif %}
-                                            {% if request.user == review.user or request.user.is_superuser %}
-                                                <button class="delete-review btn btn-sm btn-danger" data-review-id="{{ review.id }}">Supprimer</button>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <p>Aucun avis pour ce produit pour le moment.</p>
-                                    {% endfor %}
-
-                                    </div>
-
-
-                                    
+                                                </div>-->
 
 
 
 
 
 
-                                    <div class="tab-pane" id="nav-vision" role="tabpanel">
-                                        <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et tempor sit. Aliqu diam
-                                            amet diam et eos labore. 3</p>
-                                        <p class="mb-0">Diam dolor diam ipsum et tempor sit. Aliqu diam amet diam et eos labore.
-                                            Clita erat ipsum et lorem et sit</p>
                                     </div>
                                 </div>
                             </div>
 
 
-                            <h4 class="mb-5 fw-bold">Leave a Review</h4>
-                            <form action="{% url 'add_review' product.id %}" method="post">
-                                {% csrf_token %}
-                                <div class="row g-4">
-                                    <div class="col-lg-12">
-                                        <div class="border-bottom rounded my-4">
-                                            <textarea name="comment" class="form-control border-0" cols="30" rows="8" placeholder="Your Review *" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="d-flex justify-content-between py-3 mb-5">
-                                            <div class="d-flex align-items-center">
-                                                <p class="mb-0 me-3">Your Rating:</p>
-                                                <div class="rating">
-                                                    {% for i in "12345" %}
-                                                        <input type="radio" name="rating" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" required>
-                                                        <label for="star{{ forloop.counter }}"></label>
-                                                    {% endfor %}
-                                                </div>
+
+
+                            <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
+                                {% for review in product.reviews.all %}
+                                <div class="d-flex review" id="review-{{ review.id }}">
+                                    <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3"
+                                        style="width: 100px; height: 100px;" alt="">
+                                    <div class="">
+                                        <p class="mb-2" style="font-size: 14px;">{{ review.created_at|date:"F d, Y" }}
+                                        </p>
+                                        <div class="d-flex justify-content-between">
+                                            <h5>{{ review.user.username }}</h5>
+                                            <div class="d-flex mb-3">
+                                                {% for i in review.rating|ljust:5 %}
+                                                <i
+                                                    class="fa fa-star {% if forloop.counter <= review.rating %}text-secondary{% endif %}"></i>
+                                                {% endfor %}
                                             </div>
-                                            <button type="submit" class="btn border border-secondary text-primary rounded-pill px-4 py-3">Post Review</button>
                                         </div>
+                                        <p class="comment">{{ review.comment }}</p>
+                                        {% if request.user == review.user or request.user.is_superuser %}
+                                        <button class="edit-review btn btn-sm btn-primary"
+                                            data-review-id="{{ review.id }}">Modifier</button>
+                                        {% endif %}
+                                        {% if request.user == review.user or request.user.is_superuser %}
+                                        <button class="delete-review btn btn-sm btn-danger"
+                                            data-review-id="{{ review.id }}">Supprimer</button>
+                                        {% endif %}
                                     </div>
                                 </div>
-                            </form>
-                            
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-xl-3">
-                        <div class="row g-4 fruite">
-                            <div class="col-lg-12">
-                                <div class="mb-3">
-                                    <h4>Categories</h4>
-                                    <ul class="list-unstyled fruite-categorie">
-                                        <li>
-                                            <div class="d-flex justify-content-between fruite-name">
-                                                <a href="{% url 'shop' %}"><i class="fas fa-apple-alt me-2"></i>All Categories</a>
-                                                <span>({{ products.count }})</span>
-                                            </div>
-                                        </li>
-                                        {% for category in categories %}
-                                        <li>
-                                            <div class="d-flex justify-content-between fruite-name">
-                                                <a href="{% url 'shop' %}?category={{ category.id }}"><i class="fas fa-apple-alt me-2"></i>{{ category.name }}</a>
-                                                <span>({{ category.products.count }})</span>
-                                            </div>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
+                                {% empty %}
+                                <p>Aucun avis pour ce produit pour le moment.</p>
+                                {% endfor %}
+
                             </div>
-                            
-                            <div class="col-lg-12">
-                                <h4 class="mb-4">Featured products</h4>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded" style="width: 100px; height: 100px;">
-                                        <img src="img/featur-1.jpg" class="img-fluid rounded" alt="Image">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded" style="width: 100px; height: 100px;">
-                                        <img src="img/featur-2.jpg" class="img-fluid rounded" alt="">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded" style="width: 100px; height: 100px;">
-                                        <img src="img/featur-3.jpg" class="img-fluid rounded" alt="">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                        <img src="img/vegetable-item-4.jpg" class="img-fluid rounded" alt="">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                        <img src="img/vegetable-item-5.jpg" class="img-fluid rounded" alt="">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-start">
-                                    <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                        <img src="img/vegetable-item-6.jpg" class="img-fluid rounded" alt="">
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Big Banana</h6>
-                                        <div class="d-flex mb-2">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                        <div class="d-flex mb-2">
-                                            <h5 class="fw-bold me-2">2.99 $</h5>
-                                            <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-center my-4">
-                                    <a href="#" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">Vew More</a>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="position-relative">
-                                    <img src="img/banner-fruits.jpg" class="img-fluid w-100 rounded" alt="">
-                                    <div class="position-absolute" style="top: 50%; right: 10px; transform: translateY(-50%);">
-                                        <h3 class="text-secondary fw-bold">Fresh <br> Fruits <br> Banner</h3>
-                                    </div>
-                                </div>
+
+
+
+
+
+
+
+
+
+
+                            <div class="tab-pane" id="nav-vision" role="tabpanel">
+                                <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et tempor
+                                    sit. Aliqu diam
+                                    amet diam et eos labore. 3</p>
+                                <p class="mb-0">Diam dolor diam ipsum et tempor sit. Aliqu diam amet diam et eos labore.
+                                    Clita erat ipsum et lorem et sit</p>
                             </div>
                         </div>
                     </div>
 
-                    
+
+                    <form action="{% url 'add_review' product.id %}" method="post">
+                        {% csrf_token %}
+                        <h4 class="mb-5 fw-bold">Leave a Review</h4>
+                        <div class="row g-4">
+                            <div class="col-lg-12">
+                                <div class="border-bottom rounded my-4">
+                                    <textarea name="comment" class="form-control border-0" cols="30" rows="8"
+                                        placeholder="Your Review *" required></textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="d-flex justify-content-between py-3 mb-5">
+                                    <div class="d-flex align-items-center">
+                                        <p class="mb-0 me-3">Your Rating:</p>
+                                        <div class="rating">
+                                            {% for i in "12345" %}
+                                            <input type="radio" name="rating" value="{{ forloop.counter }}"
+                                                id="star{{ forloop.counter }}" required>
+                                            <label for="star{{ forloop.counter }}"></label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="btn border border-secondary text-primary rounded-pill px-4 py-3">Post
+                                        Review</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
                 </div>
+            </div>
+            <div class="col-lg-4 col-xl-3">
+                <div class="row g-4 fruite">
+                    <div class="col-lg-12">
+                        <div class="mb-3">
+                            <h4>Categories</h4>
+                            <ul class="list-unstyled fruite-categorie">
+                                <li>
+                                    <div class="d-flex justify-content-between fruite-name">
+                                        <a href="{% url 'shop' %}"><i class="fas fa-apple-alt me-2"></i>All
+                                            Categories</a>
+                                        <span>({{ products.count }})</span>
+                                    </div>
+                                </li>
+                                {% for category in categories %}
+                                <li>
+                                    <div class="d-flex justify-content-between fruite-name">
+                                        <a href="{% url 'shop' %}?category={{ category.id }}"><i
+                                                class="fas fa-apple-alt me-2"></i>{{ category.name }}</a>
+                                        <span>({{ category.products.count }})</span>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
 
-                <h1 class="fw-bold mb-0">Related products</h1>
-                {% if related_products %}
-                <div class="row g-4 justify-content-center">
-                    {% for product in related_products %}
-                    <div class="col-md-6 col-lg-6 col-xl-4">
-                        <div class="rounded position-relative fruite-item">
-                            <div class="fruite-img">
-                                <img src="{{ product.image.url }}" class="img-fluid w-100 rounded-top" alt="{{ product.name }}">
+                    <div class="col-lg-12">
+                        <h4 class="mb-4">Featured products</h4>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded" style="width: 100px; height: 100px;">
+                                <img src="img/featur-1.jpg" class="img-fluid rounded" alt="Image">
                             </div>
-                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">{{ product.category.name }}</div>
-                         
-                            <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                <h4><a href="{% url 'shopDetails' product.name %}">{{ product.name }}</a></h4>
-                                <p>{{ product.description|truncatewords:20 }}</p>
-                                <div class="d-flex justify-content-between flex-lg-wrap">
-                                    <p class="text-dark fs-5 fw-bold mb-0">{{ product.price }} € / kg</p>
-                                    <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                   
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
                                 </div>
-                               
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
                             </div>
                         </div>
-                       
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded" style="width: 100px; height: 100px;">
+                                <img src="img/featur-2.jpg" class="img-fluid rounded" alt="">
+                            </div>
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded" style="width: 100px; height: 100px;">
+                                <img src="img/featur-3.jpg" class="img-fluid rounded" alt="">
+                            </div>
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded me-4" style="width: 100px; height: 100px;">
+                                <img src="img/vegetable-item-4.jpg" class="img-fluid rounded" alt="">
+                            </div>
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded me-4" style="width: 100px; height: 100px;">
+                                <img src="img/vegetable-item-5.jpg" class="img-fluid rounded" alt="">
+                            </div>
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-start">
+                            <div class="rounded me-4" style="width: 100px; height: 100px;">
+                                <img src="img/vegetable-item-6.jpg" class="img-fluid rounded" alt="">
+                            </div>
+                            <div>
+                                <h6 class="mb-2">Big Banana</h6>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star text-secondary"></i>
+                                    <i class="fa fa-star"></i>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <h5 class="fw-bold me-2">2.99 $</h5>
+                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center my-4">
+                            <a href="#"
+                                class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">Vew
+                                More</a>
+                        </div>
                     </div>
-                    {% endfor %}
+                    <div class="col-lg-12">
+                        <div class="position-relative">
+                            <img src="img/banner-fruits.jpg" class="img-fluid w-100 rounded" alt="">
+                            <div class="position-absolute" style="top: 50%; right: 10px; transform: translateY(-50%);">
+                                <h3 class="text-secondary fw-bold">Fresh <br> Fruits <br> Banner</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% else %}
-                <p>Aucun produit similaire trouvé.</p>
-                {% endif %}
-                
-
-
             </div>
 
-            <script>
-                document.querySelectorAll('.edit-review').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const reviewId = this.getAttribute('data-review-id');
-                        const reviewElement = document.getElementById(`review-${reviewId}`);
-                        const commentElement = reviewElement.querySelector('.comment');
-                        const currentComment = commentElement.textContent;
-                
-                        const textarea = document.createElement('textarea');
-                        textarea.value = currentComment;
-                        commentElement.replaceWith(textarea);
-                
-                        const saveButton = document.createElement('button');
-                        saveButton.textContent = 'Enregistrer';
-                        saveButton.addEventListener('click', function() {
-                            const newComment = textarea.value;
-                            fetch(`/products/update-review/${reviewId}/`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    
-                                },
-                                body: JSON.stringify({ comment: newComment })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    commentElement.textContent = data.comment;
-                                    reviewElement.querySelector('.updated-at').textContent = data.updated_at;
-                                    textarea.replaceWith(commentElement);
-                                    saveButton.remove();
-                                }
-                            });
-                        });
-                
-                        reviewElement.appendChild(saveButton);
-                    });
-                });
-                
-                
-                </script>
 
-                <script>
-                    $(document).ready(function() {
-                        $('.delete-review').click(function() {
-                            var reviewId = $(this).data('review-id');
-                            if (confirm('Êtes-vous sûr de vouloir supprimer cette review ?')) {
-                                $.ajax({
-                                    url: '/products/delete-review/' + reviewId + '/',
-                                    type: 'POST',
-                                    headers: {
-                                        'X-CSRFToken': getCookie('csrftoken')
-                                    },
-                                    success: function(data) {
-                                        if (data.success) {
-                                            $('#review-' + reviewId).remove();
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.error('Erreur lors de la suppression:', error);
-                                    }
-                                });
-                            }
-                        });
-                    });
-                    
-                    
-                    function getCookie(name) {
-                        let cookieValue = null;
-                            if (document.cookie && document.cookie !== '') {
-                                const cookies = document.cookie.split(';');
-                                for (let i = 0; i < cookies.length; i++) {
-                                    const cookie = cookies[i].trim();
-                                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                        break;
-                                    }
-                                }
-                            }
-                        return cookieValue;
-                    }
-                    </script>
-                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-                
         </div>
-        <!-- Single Product End -->
-    
 
-        {% endblock %}
+        <h1 class="fw-bold mb-0">Related products</h1>
+        {% if related_products %}
+        <div class="row g-4 justify-content-center">
+            {% for product in related_products %}
+            <div class="col-md-6 col-lg-6 col-xl-4">
+                <div class="rounded position-relative fruite-item">
+                    <div class="fruite-img">
+                        <img src="{{ product.image.url }}" class="img-fluid w-100 rounded-top" alt="{{ product.name }}">
+                    </div>
+                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute"
+                        style="top: 10px; left: 10px;">{{ product.category.name }}</div>
+                    <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                        <h4><a href="{% url 'shopDetails' product.name %}">{{ product.name }}</a></h4>
+                        <p>{{ product.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between flex-lg-wrap">
+                            <p class="text-dark fs-5 fw-bold mb-0">{{ product.price }} € / kg</p>
+                            <a href="#" class="btn border border-secondary rounded-pill px-3 text-primary"><i
+                                    class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>Aucun produit similaire trouvé.</p>
+        {% endif %}
+
+
+
+    </div>
+
+    <script>
+        document.querySelectorAll('.edit-review').forEach(button => {
+            button.addEventListener('click', function () {
+                const reviewId = this.getAttribute('data-review-id');
+                const reviewElement = document.getElementById(`review-${reviewId}`);
+                const commentElement = reviewElement.querySelector('.comment');
+                const currentComment = commentElement.textContent;
+
+                const textarea = document.createElement('textarea');
+                textarea.value = currentComment;
+                commentElement.replaceWith(textarea);
+
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Enregistrer';
+                saveButton.addEventListener('click', function () {
+                    const newComment = textarea.value;
+                    fetch(`/products/update-review/${reviewId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                        },
+                        body: JSON.stringify({ comment: newComment })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                commentElement.textContent = data.comment;
+                                reviewElement.querySelector('.updated-at').textContent = data.updated_at;
+                                textarea.replaceWith(commentElement);
+                                saveButton.remove();
+                            }
+                        });
+                });
+
+                reviewElement.appendChild(saveButton);
+            });
+        });
+
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.delete-review').click(function () {
+                var reviewId = $(this).data('review-id');
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette review ?')) {
+                    $.ajax({
+                        url: '/products/delete-review/' + reviewId + '/',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                $('#review-' + reviewId).remove();
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Erreur lors de la suppression:', error);
+                        }
+                    });
+                }
+            });
+        });
+
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</div>
+<!-- Single Product End -->
+
+
+{% endblock %}
+

@@ -1,7 +1,7 @@
 # Virtual environments
 env/
 venv/
-
+myenv/
 # Python bytecode files
 *.pyc
 __pycache__/

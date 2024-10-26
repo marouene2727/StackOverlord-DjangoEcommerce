@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'products',
     'reclamations',
     'background_task',
-   
+    'blogs',
+
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,8 @@ ROOT_URLCONF = 'EcommerceSante.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),os.path.join(BASE_DIR, 'blogs/templates/articles'),
+            os.path.join(BASE_DIR, 'blogs/templates/comments'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -144,7 +146,15 @@ LOGOUT_REDIRECT_URL = 'home'  # Redirection après la déconnexion
 
 
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Assurez-vous également que STATIC_URL est défini
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Dossier sur le serveur pour stocker les fichiers médias
+
 MEDIA_URL = '/img/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'img')
 LOGGING = {
     'version': 1,
