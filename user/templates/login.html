@@ -28,20 +28,20 @@
 					</span>
 				</div>
 
-				<form class="login100-form validate-form" method="POST" action="{% url 'login' %}">
+				<form class="login100-form validate-form" method="POST" action="{% url 'login' %}" enctype="multipart/form-data"> <!-- Ajout de enctype -->
 					{% csrf_token %}
 					<div class="wrap-input100 validate-input m-b-26" data-validate="Username is required">
 						<span class="label-input100">Nom d'utilisateur</span>
 						<input class="input100" type="text" name="username" placeholder="Entrez le nom d'utilisateur" required>
 						<span class="focus-input100"></span>
 					</div>
-
+				
 					<div class="wrap-input100 validate-input m-b-18" data-validate="Password is required">
 						<span class="label-input100">Mot de passe</span>
 						<input class="input100" type="password" name="password" placeholder="Entrez le mot de passe" required>
 						<span class="focus-input100"></span>
 					</div>
-
+				
 					<div class="flex-sb-m w-full p-b-30">
                         <div class="contact100-form-checkbox">
                             <a class="signup-link" href="{% url 'signup' %}">
@@ -54,21 +54,15 @@
 							</a>
 						</div>
                     </div>
-
 					<div class="container-login100-form-btn">
-						<button type="submit" class="login100-form-btn">
-							Se connecter
-						</button>
+						<button type="submit" class="login100-form-btn">Se connecter</button>
 					</div>
-					<div class="container-login100-form-btn">
-						<div class="txt1">
-									Ou
+					<div class="flex-sb-m w-full p-b-30">
+						<div>
+							<a href="#" id="face-id-link" class="txt1">Se connecter avec Face ID</a>
 						</div>
-						<br>
-						
 					</div>
-					
-
+					<video id="video" width="300" height="200" style="display:none;"></video>
 				</form>
 				
 			</div>
@@ -85,5 +79,79 @@
 	<script src="{% static 'login/vendor/countdowntime/countdowntime.js' %}"></script>
 	<script src="{% static 'login/js/main.js' %}"></script>
 
+	<script>
+		document.getElementById('face-id-link').addEventListener('click', function(event) {
+			event.preventDefault();
+		
+			const video = document.getElementById('video');
+			const constraints = {
+				video: true
+			};
+		
+			// Ouvrir la caméra
+			navigator.mediaDevices.getUserMedia(constraints)
+				.then(function(stream) {
+					video.srcObject = stream;
+					video.style.display = 'block';
+					video.play();
+		
+					// Capturer une image après 3 secondes
+					setTimeout(function() {
+						const canvas = document.createElement('canvas');
+						canvas.width = video.videoWidth;
+						canvas.height = video.videoHeight;
+						const context = canvas.getContext('2d');
+						context.drawImage(video, 0, 0, canvas.width, canvas.height);
+		
+						// Arrêter le flux vidéo
+						stream.getTracks().forEach(track => track.stop());
+						video.style.display = 'none';
+		
+						// Convertir l'image en base64 et envoyer au serveur
+						const imageData = canvas.toDataURL('image/png');
+						authenticateFace(imageData);
+					}, 3000);
+				})
+				.catch(function(error) {
+					console.error("Erreur d'accès à la caméra : ", error);
+				});
+		});
+	
+		function getCookie(name) {
+			let cookieValue = null;
+			if (document.cookie && document.cookie !== '') {
+				const cookies = document.cookie.split(';');
+				for (let i = 0; i < cookies.length; i++) {
+					const cookie = cookies[i].trim();
+					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+	
+		function authenticateFace(imageData) {
+			const csrftoken = getCookie('csrftoken');
+	
+			fetch('/authenticate-face/', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrftoken
+				},
+				body: JSON.stringify({ image: imageData })
+			})
+			.then(response => {
+				if (response.ok) {
+					window.location.href = '/home/'; // Redirige vers le tableau de bord
+				} else {
+					alert('Échec de la reconnaissance faciale.');
+				}
+			})
+			.catch(error => console.error('Erreur : ', error));
+		}
+	</script>
 </body>
 </html>

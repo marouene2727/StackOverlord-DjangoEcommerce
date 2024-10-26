@@ -10,7 +10,8 @@ class UserProfile(models.Model):
     address = models.CharField(max_length=255, blank=True, null=True)  # Nouveau champ adresse
     gender = models.CharField(max_length=10, choices=[('Monsieur', 'Monsieur'), ('Madame', 'Madame')], blank=True)  # Nouveau champ genre
     birth_date = models.DateField(blank=True, null=True)  # Nouveau champ date de naissance
-
+    face_encoding = models.BinaryField(null=True, blank=True)  # Champ pour stocker l'encodage du visage
+    
     def __str__(self):
         return f'{self.user.username} Profile'
         
