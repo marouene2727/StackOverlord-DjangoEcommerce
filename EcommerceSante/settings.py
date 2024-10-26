@@ -23,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-mf71a7w9#1nlik0c9=eu$7$onj#y%29nm-lpg-+)669b+!)yn)'
-
+ 
+OPENAI_API_KEY = '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' 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -40,6 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',
+    'products',
+    'reclamations',
+    'background_task',
+    'blogs',
+
 ]
 
 MIDDLEWARE = [
@@ -57,7 +63,8 @@ ROOT_URLCONF = 'EcommerceSante.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),os.path.join(BASE_DIR, 'blogs/templates/articles'),
+            os.path.join(BASE_DIR, 'blogs/templates/comments'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,6 +145,7 @@ LOGIN_REDIRECT_URL = 'home'  # Redirection après la connexion
 LOGOUT_REDIRECT_URL = 'home'  # Redirection après la déconnexion
 
 
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -151,6 +159,18 @@ DEFAULT_FROM_EMAIL = 'rahmaaslimii83@gmail.com'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Assurez-vous également que STATIC_URL est défini
+
+
+MEDIA_URL = '/img/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'img')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -159,10 +179,16 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
+
     'loggers': {
         '': {
             'handlers': ['console'],
             'level': 'DEBUG',
         },
-    },
+
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
 }

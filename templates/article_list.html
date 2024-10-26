@@ -1,0 +1,11 @@
+<h1>Articles</h1>
+<a href="{% url 'article_create' %}">Créer un nouvel article</a>
+<ul>
+    {% for article in articles %}
+        <li>
+            <a href="{% url 'article_detail' article.pk %}">{{ article.title }}</a>
+            <a href="{% url 'article_update' article.pk %}">Éditer</a>
+            <a href="{% url 'article_delete' article.pk %}">Supprimer</a>
+        </li>
+    {% endfor %}
+</ul>
