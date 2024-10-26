@@ -1,0 +1,18 @@
+<!-- templates/admin/statistiques.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiques des Réclamations</title>
+    <!-- Ajoutez cette ligne pour inclure Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Statistiques des Réclamations</h1>
+    {% if graph %}
+        <div>{{ graph|safe }}</div>
+    {% else %}
+        <p>Aucune donnée disponible pour générer des statistiques.</p>
+    {% endif %}
+</body>
+</html>

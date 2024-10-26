@@ -140,7 +140,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{% url 'soumettre_reclamation' %}" method="POST">
+                <!-- Afficher les messages d'erreur -->
+                <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
+                
+                <form id="reclamationForm" action="{% url 'soumettre_reclamation' %}" method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="type" class="form-label">Type</label>
@@ -161,5 +164,30 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('reclamationForm').addEventListener('submit', function(event) {
+        // Empêcher le comportement par défaut
+        event.preventDefault();
+        
+        // Récupérer la description
+        const description = document.getElementById('description').value;
+
+        // Vérifier les mots inappropriés
+        const inappropriateWords = ['merde', 'putain', 'con', 'salaud', 'chiant', 'imbécile']; // Ajoutez d'autres mots ici
+        const containsInappropriate = inappropriateWords.some(word => description.includes(word));
+
+        if (containsInappropriate) {
+            document.getElementById('errorAlert').innerText = "La description contient des mots inappropriés. Veuillez reformuler.";
+            document.getElementById('errorAlert').style.display = 'block'; // Afficher l'alerte
+        } else {
+            this.submit(); // Soumettre le formulaire si tout est bon
+        }
+    });
+</script>
+
+
+
+
 
 {% endblock %}

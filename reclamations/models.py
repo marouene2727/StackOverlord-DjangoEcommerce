@@ -25,3 +25,10 @@ class Reclamation(models.Model):
 
     def __str__(self):
         return f"Réclamation de {self.user.username} - {self.type_reclamation}"
+
+class ReclamationRapport(models.Model):
+    date_creation = models.DateTimeField(auto_now_add=True)
+    contenu = models.TextField()
+
+    def __str__(self):
+        return f"Rapport du {self.date_creation.strftime('%Y-%m-%d %H:%M:%S')}"
