@@ -7,70 +7,7 @@
 
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Articles</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <script src="{% static 'js/script.js' %}"></script>
-</head>
-<body>
-    <div class="container-fluid py-5">
-        <div class="container py-5">
-            <div class="text-center mx-auto mb-5" style="max-width: 700px;">
-                <h1 class="display-4">Articles</h1>
-                <p>Voici la liste des articles disponibles.</p>
-                <a href="{% url 'article_create' %}" class="btn btn-primary">Créer un nouvel article</a>
-            </div>
-            <div class="row g-4">
-                {% for article in articles %}
-<div class="col-lg-6 col-xl-4">
-    <div class="p-4 rounded bg-light">
-        <div class="row align-items-center">
-            <div class="col-6">
-                {% if article.image %}
-                <img src="{{ article.image.url }}" class="card-img-top" alt="{{ article.title }}">
-            {% endif %}            </div>
-            <div class="col-6">
-                <a href="{% url 'article_detail' article.pk %}" class="h5">{{ article.title }}</a>
-                <div class="d-flex my-3">
-                    {% for star in "*****" %}
-                        {% if forloop.counter <= article.rating %}
-                            <i class="fas fa-star text-primary"></i>
-                        {% else %}
-                            <i class="fas fa-star"></i>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <h4 class="mb-3">contenu :  </h4>
-                <p>{{ article.content }}</p>
-                <h5 class="card-title"> title : </h5>
-                <P>{{ article.title }}</P>
-               
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
 
-                <a href="{% url 'article_detail' article.pk %}" class="btn btn-primary">Voir</a>
-                {% if article.author == request.user %}
-                    <a href="{% url 'article_update' article.pk %}" class="btn btn-outline-warning border border-secondary ms-2">Éditer</a>
-                    <a href="{% url 'article_delete' article.pk %}" class="btn btn-outline-primary border border-primary ms-2">Supprimer</a>
-                {% endif %}
-
-                </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Fact Start -->
-    
-</body>
-</html>
 
 <!-- Fruits Shop Start-->
 <!DOCTYPE html>
