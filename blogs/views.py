@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import SignupForm, LoginForm
 from django.http import HttpResponse
 
-from .utils import analyze_sentiment  # Ajustez le chemin selon la structure de votre projet
+from .utils import analyze_sentiment, summarize_article  # Ajustez le chemin selon la structure de votre projet
 
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Article, Comment
@@ -85,9 +85,19 @@ def article_detail(request, pk):
     comments = article.comments.all()
     sentiment_scores = [(comment.created_at.strftime("%Y-%m-%d %H:%M"), comment.sentiment_score) for comment in comments]
 
-    form = CommentForm()  # Créer un formulaire vide pour ajouter un commentaire
-    return render(request, 'articles/article_detail.html', {'article': article, 'comments': comments, 'form': form})
+    # Générer le résumé de l'article
+    try:
+        summary = summarize_article(article.content)
+    except Exception as e:
+        summary = "Erreur lors de la génération du résumé."
 
+    form = CommentForm()  # Créer un formulaire vide pour ajouter un commentaire
+    return render(request, 'articles/article_detail.html', {
+        'article': article,
+        'comments': comments,
+        'form': form,
+        'summary': summary,  # Passer le résumé au template
+    })
 @login_required
 def article_create(request):
     if request.method == 'POST':

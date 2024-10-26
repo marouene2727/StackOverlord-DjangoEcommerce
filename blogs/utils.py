@@ -14,3 +14,9 @@ def analyze_sentiment(text):
     except Exception as e:
         print(f"Erreur lors de l'analyse de sentiment: {e}")
         return 'NEUTRAL', 0.0  # Valeur par défaut
+
+
+def summarize_article(content, max_length=100):
+    summarizer = pipeline("summarization")
+    summary = summarizer(content, max_length=max_length, min_length=25, do_sample=False)
+    return summary[0]['summary_text']

@@ -12,6 +12,8 @@
                 {% endif %}
                 <h5>Contenu d'article :</h5>
                 <p>{{ article.content }}</p>
+                <h5>Résumé :</h5>
+                <p>{{ summary }}</p>  <!-- Ajouter cette ligne pour afficher le résumé -->
                 <p>Publié le : {{ article.created_at }}</p>
                 {% if article.author == request.user %}
                     <a href="{% url 'article_update' article.pk %}" class="btn btn-primary">Éditer</a>
