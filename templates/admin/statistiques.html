@@ -4,15 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Statistiques des Réclamations</title>
-    <!-- Ajoutez cette ligne pour inclure Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <h1>Statistiques des Réclamations</h1>
-    {% if graph %}
-        <div>{{ graph|safe }}</div>
+
+    <h2>Réclamations Actuelles par Type</h2>
+    {% if current_graph %}
+        <div>{{ current_graph|safe }}</div>
     {% else %}
-        <p>Aucune donnée disponible pour générer des statistiques.</p>
+        <p>Aucune donnée disponible pour afficher les réclamations actuelles.</p>
+    {% endif %}
+
+    <h2>Prédictions des Réclamations Futures</h2>
+    {% if prediction_graph %}
+        <div>{{ prediction_graph|safe }}</div>
+    {% else %}
+        <p>Aucune donnée disponible pour afficher les prévisions.</p>
     {% endif %}
 </body>
 </html>
