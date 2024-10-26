@@ -1,14 +1,29 @@
-# Environnement virtuel
- env/
- venv/
+# Virtual environments
+env/
+venv/
 
-# Fichiers Python
- *.pyc
- __pycache__/
+# Python bytecode files
+*.pyc
+__pycache__/
 
-# Fichiers de base de données
+# SQLite database files
 *.sqlite3
 
-# Dossiers Django
-# /static/
-# media/
+# Django specific folders
+/media/
+
+# Exclude all migrations
+**/migrations/
+
+# Ignore secret key files (if applicable)
+.env
+
+# Ignore JetBrains and VSCode project settings
+.idea/
+.vscode/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore large torch files
+venv/Lib/site-packages/torch/lib/
