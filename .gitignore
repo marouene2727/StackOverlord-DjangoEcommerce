@@ -13,9 +13,9 @@ __pycache__/
 /media/
 
 # Exclude all migrations
+
 **/migrations/ 
 
-# skander
 
 # Ignore secret key files (if applicable)
 .env
@@ -28,5 +28,6 @@ __pycache__/
 .DS_Store
 
 # Ignore large torch files
+
 venv/Lib/site-packages/torch/lib/
 

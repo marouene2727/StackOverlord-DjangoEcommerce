@@ -79,25 +79,23 @@
                             <a href="{% url 'contact' %}" class="nav-item nav-link">Contact</a>
                             <a href="{% url 'liste_reclamations' %}" class="nav-item nav-link">Reclamtions</a>
                         </div>
+                        <!-- Authentification de l'utilisateur -->
                         <div class="d-flex m-3 me-0 align-items-center">
-                            <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal">
-                                <i class="fas fa-search text-primary"></i>
-                            </button>
-                            <a href="{% url 'cart' %}" class="position-relative me-4 my-auto">
-                                <i class="fa fa-shopping-bag fa-2x"></i>
-                            </a>
-
-                            <!-- Authentification de l'utilisateur -->
+                            <!-- Afficher le nom de l'utilisateur avec un menu déroulant -->
                             {% if user.is_authenticated %}
-                            <!-- Affiche le nom de l'utilisateur et le bouton de déconnexion -->
-                            <div class="my-auto me-3 d-flex align-items-center">
-                                <i class="fas fa-user-circle fa-2x text-primary me-2"></i>
-                                <span class="text-primary fw-bold">{{ user.username }}</span>
-                            </div>
-                            <a href="{% url 'login' %}" class="btn btn-outline-warning border border-secondary ms-2">Déconnexion</a>
-                            <!--ne pas oublier de modifer le login au dessus en logout-->
+                                <div class="dropdown">
+                                    <a href="#" class="dropdown-toggle text-primary" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{ user.username }}
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownUser">
+                                        <li><a class="dropdown-item" href="{% url 'user_profile' %}">Mon Profil</a></li>
+                                        {% if user.is_superuser %}
+                                            <li><a class="dropdown-item" href="/admin/">Dashboard Admin</a></li>
+                                        {% endif %}
+                                        <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Déconnexion</a></li>
+                                    </ul>
+                                </div>
                             {% else %}
-                                <!-- Affiche le bouton de connexion si l'utilisateur n'est pas connecté -->
                                 <a href="{% url 'login' %}" class="btn btn-outline-primary">Connexion</a>
                             {% endif %}
                         </div>

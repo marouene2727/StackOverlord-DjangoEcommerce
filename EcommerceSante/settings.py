@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,17 +146,31 @@ LOGOUT_REDIRECT_URL = 'home'  # Redirection après la déconnexion
 
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'rahmaaslimii83@gmail.com'
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = 'rahmaaslimii83@gmail.com'
+
+
+# image uploads
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Assurez-vous également que STATIC_URL est défini
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Dossier sur le serveur pour stocker les fichiers médias
 
 MEDIA_URL = '/img/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'img')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -164,8 +179,16 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
+
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
 }
