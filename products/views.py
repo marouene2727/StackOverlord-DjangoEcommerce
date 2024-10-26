@@ -18,6 +18,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def home(request):
     print("salut")
@@ -75,6 +76,7 @@ def add_review(request, product_id):
     return redirect('shopDetails', product_name=product.name)
 
 
+
 def analyze_sentiment(text):
     sia = SentimentIntensityAnalyzer()
     tokens = word_tokenize(text.lower(), language='french')
@@ -88,6 +90,7 @@ def analyze_sentiment(text):
         return 'negative'
     else:
         return 'neutral'
+
 
 
 @login_required
@@ -111,6 +114,11 @@ def delete_review(request, review_id):
     review.delete()
     return JsonResponse({'success': True, 'message': 'Review supprimée avec succès'})
 
+
+
+
+
+import requests
 
 def filter_profanity(text):
     api_url = f"https://www.purgomalum.com/service/json?text={text}"
@@ -282,6 +290,7 @@ def checkout(request):
         return redirect('/products/shop/')
 
     return render(request, 'chackout.html', context)
+
 
 
 

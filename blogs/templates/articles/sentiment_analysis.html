@@ -1,0 +1,52 @@
+<!-- templates/articles/sentiment_analysis.html -->
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <h2>Analyse de sentiment pour "{{ article.title }}"</h2>
+    <canvas id="sentimentChart" width="400" height="200"></canvas>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('sentimentChart').getContext('2d');
+        const sentimentPercentages = {{ sentiment_percentages|safe }};
+        
+        const sentimentLabels = Object.keys(sentimentPercentages);
+        const sentimentData = Object.values(sentimentPercentages);
+        
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sentimentLabels,
+                datasets: [{
+                    label: 'Pourcentage de Sentiment',
+                    data: sentimentData,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Pourcentage (%)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</div>
+{% endblock %}
